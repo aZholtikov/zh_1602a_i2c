@@ -1,3 +1,116 @@
-# esp_component_template
+# ESP32 ESP-IDF and ESP8266 RTOS SDK component for liquid crystal display module 1602A via I2C connection (PCF8574)
 
-esp_component_template
+## Tested on
+
+1. [ESP8266 RTOS_SDK v3.4](https://docs.espressif.com/projects/esp8266-rtos-sdk/en/latest/index.html#)
+2. [ESP32 ESP-IDF v5.4](https://docs.espressif.com/projects/esp-idf/en/release-v5.4/esp32/index.html)
+
+## Features
+
+1. Support of 16 LCD 1602A on one bus.
+
+## Connection
+
+| 1602A | PCF8574 |
+| ----- | ------- |
+|   RS  |   P0    |
+|   E   |   P2    |
+|   D4  |   P4    |
+|   D5  |   P5    |
+|   D6  |   P6    |
+|   D7  |   P7    |
+
+## Dependencies
+
+1. [zh_vector](http://git.zh.com.ru/alexey.zholtikov/zh_vector)
+2. [zh_pcf8574](http://git.zh.com.ru/alexey.zholtikov/zh_pcf8574)
+
+## Using
+
+In an existing project, run the following command to install the components:
+
+```text
+cd ../your_project/components
+git clone http://git.zh.com.ru/alexey.zholtikov/zh_1602a_i2c
+git clone http://git.zh.com.ru/alexey.zholtikov/zh_pcf8574
+git clone http://git.zh.com.ru/alexey.zholtikov/zh_vector
+```
+
+In the application, add the component:
+
+```c
+#include "zh_1602a_i2c.h"
+```
+
+## Examples
+
+One LCD on bus:
+
+```c
+#include "zh_1602a_i2c.h"
+
+#define I2C_PORT (I2C_NUM_MAX - 1)
+
+#ifndef CONFIG_IDF_TARGET_ESP8266
+i2c_master_bus_handle_t i2c_bus_handle = NULL;
+#endif
+
+zh_pcf8574_handle_t lcd_1602a_handle = {0};
+
+void app_main(void)
+{
+    esp_log_level_set("zh_1602a_i2c", ESP_LOG_NONE); // For ESP8266 first enable "Component config -> Log output -> Enable log set level" via menuconfig.
+    esp_log_level_set("zh_pcf8574", ESP_LOG_NONE);   // For ESP8266 first enable "Component config -> Log output -> Enable log set level" via menuconfig.
+    esp_log_level_set("zh_vector", ESP_LOG_NONE);    // For ESP8266 first enable "Component config -> Log output -> Enable log set level" via menuconfig.
+#ifdef CONFIG_IDF_TARGET_ESP8266
+    i2c_config_t i2c_config = {
+        .mode = I2C_MODE_MASTER,
+        .sda_io_num = GPIO_NUM_4, // In accordance with used chip.
+        .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_io_num = GPIO_NUM_5, // In accordance with used chip.
+        .scl_pullup_en = GPIO_PULLUP_ENABLE,
+    };
+    i2c_driver_install(I2C_PORT, i2c_config.mode);
+    i2c_param_config(I2C_PORT, &i2c_config);
+#else
+    i2c_master_bus_config_t i2c_bus_config = {
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .i2c_port = I2C_PORT,
+        .scl_io_num = GPIO_NUM_22, // In accordance with used chip.
+        .sda_io_num = GPIO_NUM_21, // In accordance with used chip.
+        .glitch_ignore_cnt = 7,
+        .flags.enable_internal_pullup = true,
+    };
+    i2c_new_master_bus(&i2c_bus_config, &i2c_bus_handle);
+#endif
+    zh_pcf8574_init_config_t pcf8574_init_config = ZH_PCF8574_INIT_CONFIG_DEFAULT();
+#ifdef CONFIG_IDF_TARGET_ESP8266
+    pcf8574_init_config.i2c_port = I2C_PORT;
+#else
+    pcf8574_init_config.i2c_handle = i2c_bus_handle;
+#endif
+    pcf8574_init_config.i2c_address = 0x38;
+    zh_pcf8574_init(&pcf8574_init_config, &lcd_1602a_handle);
+    zh_1602a_init(&lcd_1602a_handle);
+    for (;;)
+    {
+        zh_1602a_set_cursor(&lcd_1602a_handle, 0, 0);
+        zh_1602a_print_char(&lcd_1602a_handle, "LCD 1602A");
+        zh_1602a_set_cursor(&lcd_1602a_handle, 1, 0);
+        zh_1602a_print_char(&lcd_1602a_handle, "Hello World!");
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        zh_1602a_clear_row(&lcd_1602a_handle, 0);
+        zh_1602a_print_char(&lcd_1602a_handle, "Progress: ");
+        for (uint8_t i = 0; i <= 100; ++i)
+        {
+            zh_1602a_set_cursor(&lcd_1602a_handle, 0, 10);
+            zh_1602a_print_int(&lcd_1602a_handle, i);
+            zh_1602a_print_char(&lcd_1602a_handle, "%");
+            zh_1602a_print_progress_bar(&lcd_1602a_handle, 1, i);
+        }
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        zh_1602a_lcd_clear(&lcd_1602a_handle);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+    }
+}
+```
