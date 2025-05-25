@@ -156,16 +156,16 @@ static void _zh_1602a_lcd_init(zh_pcf8574_handle_t *handle)
 
 static void _zh_1602a_send_command(zh_pcf8574_handle_t *handle, uint8_t command)
 {
-    zh_pcf8574_write(handle, (command & 0xF0));
+    zh_pcf8574_write(handle, (command & 0xF0) | 0x08);
     LCD_1602A_PULSE;
-    zh_pcf8574_write(handle, command << 4);
+    zh_pcf8574_write(handle, (command << 4) | 0x08);
     LCD_1602A_PULSE;
 }
 
 static void _zh_1602a_send_data(zh_pcf8574_handle_t *handle, uint8_t data)
 {
-    zh_pcf8574_write(handle, (data & 0xF0) | 0x01);
+    zh_pcf8574_write(handle, (data & 0xF0) | 0x09);
     LCD_1602A_PULSE;
-    zh_pcf8574_write(handle, (data << 4) | 0x01);
+    zh_pcf8574_write(handle, (data << 4) | 0x09);
     LCD_1602A_PULSE;
 }
