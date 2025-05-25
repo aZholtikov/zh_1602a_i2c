@@ -14,11 +14,17 @@ static const char *TAG = "zh_1602a_i2c";
         return err;                             \
     }
 
+#ifdef CONFIG_IDF_TARGET_ESP8266
+#define esp_delay_us(x) os_delay_us(x)
+#else
+#define esp_delay_us(x) esp_rom_delay_us(x)
+#endif
+
 #define LCD_1602A_PULSE                      \
     zh_pcf8574_write_gpio(handle, 2, true);  \
-    vTaskDelay(10 / portTICK_PERIOD_MS);     \
+    esp_delay_us(300);                       \
     zh_pcf8574_write_gpio(handle, 2, false); \
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+    esp_delay_us(400);
 
 static void _zh_1602a_lcd_init(zh_pcf8574_handle_t *handle);
 static void _zh_1602a_send_command(zh_pcf8574_handle_t *handle, uint8_t command);
