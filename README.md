@@ -89,7 +89,7 @@ void app_main(void)
 #else
     pcf8574_init_config.i2c_handle = i2c_bus_handle;
 #endif
-    pcf8574_init_config.i2c_address = 0x38;
+    pcf8574_init_config.i2c_address = 0x27;
     zh_pcf8574_init(&pcf8574_init_config, &lcd_1602a_handle);
     zh_1602a_init(&lcd_1602a_handle);
     for (;;)
@@ -107,6 +107,7 @@ void app_main(void)
             zh_1602a_print_int(&lcd_1602a_handle, i);
             zh_1602a_print_char(&lcd_1602a_handle, "%");
             zh_1602a_print_progress_bar(&lcd_1602a_handle, 1, i);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
         }
         vTaskDelay(5000 / portTICK_PERIOD_MS);
         zh_1602a_lcd_clear(&lcd_1602a_handle);
