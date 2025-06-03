@@ -1,1 +1,1 @@
-idf_component_register(SRCS "zh_1602a_i2c.c" INCLUDE_DIRS "include" REQUIRES zh_pcf8574)
+idf_component_register(SRCS "zh_160x_i2c.c" INCLUDE_DIRS "include" REQUIRES zh_pcf8574)

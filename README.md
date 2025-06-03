@@ -1,4 +1,4 @@
-# ESP32 ESP-IDF and ESP8266 RTOS SDK component for liquid crystal display module 1602A via I2C connection (PCF8574)
+# ESP32 ESP-IDF and ESP8266 RTOS SDK component for liquid crystal display module 1602(4)A via I2C connection (PCF8574)
 
 ## Tested on
 
@@ -7,18 +7,18 @@
 
 ## Features
 
-1. Support of 16 LCD 1602A on one bus.
+1. Support of 16 LCD 160X on one bus.
 
 ## Connection
 
-| 1602A | PCF8574 |
-| ----- | ------- |
-|   RS  |   P0    |
-|   E   |   P2    |
-|   D4  |   P4    |
-|   D5  |   P5    |
-|   D6  |   P6    |
-|   D7  |   P7    |
+| 1602(4)A | PCF8574 |
+| -------- | ------- |
+|    RS    |   P0    |
+|    E     |   P2    |
+|    D4    |   P4    |
+|    D5    |   P5    |
+|    D6    |   P6    |
+|    D7    |   P7    |
 
 ## Dependencies
 
@@ -31,7 +31,7 @@ In an existing project, run the following command to install the components:
 
 ```text
 cd ../your_project/components
-git clone http://git.zh.com.ru/alexey.zholtikov/zh_1602a_i2c
+git clone http://git.zh.com.ru/alexey.zholtikov/zh_160x_i2c
 git clone http://git.zh.com.ru/alexey.zholtikov/zh_pcf8574
 git clone http://git.zh.com.ru/alexey.zholtikov/zh_vector
 ```
@@ -39,7 +39,7 @@ git clone http://git.zh.com.ru/alexey.zholtikov/zh_vector
 In the application, add the component:
 
 ```c
-#include "zh_1602a_i2c.h"
+#include "zh_160x_i2c.h"
 ```
 
 ## Examples
@@ -47,7 +47,7 @@ In the application, add the component:
 One LCD on bus:
 
 ```c
-#include "zh_1602a_i2c.h"
+#include "zh_160x_i2c.h"
 
 #define I2C_PORT (I2C_NUM_MAX - 1)
 
@@ -55,13 +55,13 @@ One LCD on bus:
 i2c_master_bus_handle_t i2c_bus_handle = NULL;
 #endif
 
-zh_pcf8574_handle_t lcd_1602a_handle = {0};
+zh_pcf8574_handle_t lcd_160x_handle = {0};
 
 void app_main(void)
 {
-    esp_log_level_set("zh_1602a_i2c", ESP_LOG_NONE); // For ESP8266 first enable "Component config -> Log output -> Enable log set level" via menuconfig.
-    esp_log_level_set("zh_pcf8574", ESP_LOG_NONE);   // For ESP8266 first enable "Component config -> Log output -> Enable log set level" via menuconfig.
-    esp_log_level_set("zh_vector", ESP_LOG_NONE);    // For ESP8266 first enable "Component config -> Log output -> Enable log set level" via menuconfig.
+    esp_log_level_set("zh_160x_i2c", ESP_LOG_NONE); // For ESP8266 first enable "Component config -> Log output -> Enable log set level" via menuconfig.
+    esp_log_level_set("zh_pcf8574", ESP_LOG_NONE);  // For ESP8266 first enable "Component config -> Log output -> Enable log set level" via menuconfig.
+    esp_log_level_set("zh_vector", ESP_LOG_NONE);   // For ESP8266 first enable "Component config -> Log output -> Enable log set level" via menuconfig.
 #ifdef CONFIG_IDF_TARGET_ESP8266
     i2c_config_t i2c_config = {
         .mode = I2C_MODE_MASTER,
@@ -90,27 +90,31 @@ void app_main(void)
     pcf8574_init_config.i2c_handle = i2c_bus_handle;
 #endif
     pcf8574_init_config.i2c_address = 0x27;
-    zh_pcf8574_init(&pcf8574_init_config, &lcd_1602a_handle);
-    zh_1602a_init(&lcd_1602a_handle);
+    zh_pcf8574_init(&pcf8574_init_config, &lcd_160x_handle);
+    zh_160x_init(&lcd_160x_handle, ZH_LCD_16X2); // For LCD 16X2.
+    // zh_160x_init(&lcd_160x_handle, ZH_LCD_16X4); // For LCD 16X4.
     for (;;)
     {
-        zh_1602a_set_cursor(&lcd_1602a_handle, 0, 0);
-        zh_1602a_print_char(&lcd_1602a_handle, "LCD 1602A");
-        zh_1602a_set_cursor(&lcd_1602a_handle, 1, 0);
-        zh_1602a_print_char(&lcd_1602a_handle, "Hello World!");
+        zh_160x_set_cursor(&lcd_160x_handle, 0, 0);
+        zh_160x_print_char(&lcd_160x_handle, "LCD 1602A");
+        zh_160x_set_cursor(&lcd_160x_handle, 1, 0);
+        zh_160x_print_char(&lcd_160x_handle, "Hello World!");
         vTaskDelay(5000 / portTICK_PERIOD_MS);
-        zh_1602a_clear_row(&lcd_1602a_handle, 0);
-        zh_1602a_print_char(&lcd_1602a_handle, "Progress: ");
+        zh_160x_set_cursor(&lcd_160x_handle, 0, 0); // For LCD 16X2.
+        // zh_160x_set_cursor(&lcd_160x_handle, 2, 0); // For LCD 16X4.
+        zh_160x_print_char(&lcd_160x_handle, "Progress: ");
         for (uint8_t i = 0; i <= 100; ++i)
         {
-            zh_1602a_set_cursor(&lcd_1602a_handle, 0, 10);
-            zh_1602a_print_int(&lcd_1602a_handle, i);
-            zh_1602a_print_char(&lcd_1602a_handle, "%");
-            zh_1602a_print_progress_bar(&lcd_1602a_handle, 1, i);
+            zh_160x_set_cursor(&lcd_160x_handle, 0, 10); // For LCD 16X2.
+            // zh_160x_set_cursor(&lcd_160x_handle, 2, 10); // For LCD 16X4.
+            zh_160x_print_int(&lcd_160x_handle, i);
+            zh_160x_print_char(&lcd_160x_handle, "%");
+            zh_160x_print_progress_bar(&lcd_160x_handle, 1, i); // For LCD 16X2.
+            // zh_160x_print_progress_bar(&lcd_160x_handle, 3, i); // For LCD 16X4.
             vTaskDelay(100 / portTICK_PERIOD_MS);
         }
         vTaskDelay(5000 / portTICK_PERIOD_MS);
-        zh_1602a_lcd_clear(&lcd_1602a_handle);
+        zh_160x_lcd_clear(&lcd_160x_handle);
         vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
