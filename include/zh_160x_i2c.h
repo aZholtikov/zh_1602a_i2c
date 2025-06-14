@@ -33,7 +33,7 @@ extern "C"
      * @brief Sets the cursor to a specific position on the LCD.
      *
      * @param[in] handle Pointer to unique PCF8574 handle.
-     * @param[in] row The row number (0 or 1).
+     * @param[in] row The row number.
      * @param[in] col The column number (0–15).
      *
      * @return ESP_OK if success or an error code otherwise.
@@ -75,7 +75,7 @@ extern "C"
      * @brief Displays a progress bar on a specific row of the LCD.
      *
      * @param[in] handle Pointer to unique PCF8574 handle.
-     * @param[in] row The row number (0 or 1).
+     * @param[in] row The row number.
      * @param[in] progress The progress percentage (0–100).
      *
      * @return ESP_OK if success or an error code otherwise.
@@ -86,7 +86,7 @@ extern "C"
      * @brief Clears a specific row on the LCD.
      *
      * @param[in] handle Pointer to unique PCF8574 handle.
-     * @param[in] row The row number (0 or 1).
+     * @param[in] row The row number.
      *
      * @return ESP_OK if success or an error code otherwise.
      */
