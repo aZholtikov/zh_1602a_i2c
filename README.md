@@ -96,7 +96,7 @@ void app_main(void)
     for (;;)
     {
         zh_160x_set_cursor(&lcd_160x_handle, 0, 0);
-        zh_160x_print_char(&lcd_160x_handle, "LCD 1602A");
+        zh_160x_print_char(&lcd_160x_handle, "LCD 160X");
         zh_160x_set_cursor(&lcd_160x_handle, 1, 0);
         zh_160x_print_char(&lcd_160x_handle, "Hello World!");
         vTaskDelay(5000 / portTICK_PERIOD_MS);
